@@ -1,8 +1,8 @@
 /* ===== Section cube rail ===== */
 
 .cube-rail {
-    --cube-size: 138px;
-    --face-size: 126px;
+    --cube-size: 116px;
+    --face-size: 106px;
     --cube-half: calc(var(--cube-size) / 2);
     --face-inset: calc((var(--cube-size) - var(--face-size)) / 2);
     --logo-red: #ec0000;
@@ -11,9 +11,9 @@
     z-index: 6;
     top: clamp(96px, 16vh, 168px);
     /* Approximate gutter until JS measures .container — reduces jump if boot flash slips */
-    left: max(8px, calc((100vw - min(1240px, 100vw - 48px)) / 2 - 196px - 28px));
-    width: 196px;
-    height: 228px;
+    left: max(8px, calc((100vw - min(1240px, 100vw - 48px)) / 2 - 160px - 28px));
+    width: 160px;
+    height: 200px;
     pointer-events: none;
     overflow: visible;
     -webkit-user-select: none;
@@ -38,8 +38,8 @@
 
 .cube-rail .cube-slot {
     position: relative;
-    width: 196px;
-    height: 228px;
+    width: 160px;
+    height: 200px;
     overflow: visible;
 }
 
@@ -138,7 +138,7 @@
     background: var(--logo-red);
     color: #fff;
     font-family: "Montserrat", system-ui, sans-serif;
-    font-size: 78px;
+    font-size: 66px;
     font-weight: 900;
     font-style: normal;
     line-height: 1;
@@ -195,7 +195,7 @@
 }
 
 /* Extra-safe: hide on short viewports / heavy zoom */
-@media (max-width: 1280px), (max-height: 560px) {
+@media (max-width: 1120px), (max-height: 560px) {
     .cube-rail {
         display: none;
     }

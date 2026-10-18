@@ -69,7 +69,7 @@ function fallbackCopy(text) {
 }
 
 async function copyUsername() {
-    const username = "ocbxvi";
+    const username = "emotionalquintessence";
 
     try {
         if (navigator.clipboard && window.isSecureContext) {

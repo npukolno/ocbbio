@@ -3,7 +3,7 @@
     // Screen-left = left, screen-right = front, top = top
     const CUBE_MAP = {
         hero: {
-            letters: { left: "O", front: "B", top: "C", right: "B", back: "O", bottom: "C" }
+            letters: { left: "B", front: "O", top: "I", right: "O", back: "B", bottom: "I" }
         },
         skills: {
             letters: { left: "S", front: "L", top: "K", right: "L", back: "S", bottom: "K" }
@@ -312,7 +312,7 @@
         const gutter = rect.left;
         const minGutter = cubeW + gap + 8;
 
-        if (gutter < minGutter || window.innerWidth < 1280) {
+        if (gutter < minGutter || window.innerWidth < 1120) {
             rail.classList.add("is-collapsed");
             return;
         }
