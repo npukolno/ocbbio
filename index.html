@@ -345,13 +345,13 @@
                         </div>
                         <div class="project-details">
                             <div class="project-tech">
-                                <span class="tech-chip">React</span>
+                                <span class="tech-chip">Electron</span>
                                 <span class="tech-chip">TypeScript</span>
-                                <span class="tech-chip">Desktop</span>
+                                <span class="tech-chip">Cross-platform</span>
                             </div>
-                            <p class="project-description">Unofficial SoundCloud client with no ads, regional unlocks, Discord Rich Presence, OAuth login, built-in track downloader, and other quality-of-life features. Live since April 2026.</p>
+                            <p class="project-description"><span class="project-update">UPDATE 3.0 AVAILABLE!</span>Unofficial SoundCloud desktop client: ad-free playback, synced lyrics, 10-band EQ, live visualizer, track and playlist downloads, Discord Rich Presence, Linux tray and MPRIS. Linux, Windows and macOS.</p>
                             <div class="project-links">
-                                <a href="https://github.com/ocb2016/ocbbio/releases/latest" class="project-link" id="sixteencloud-download" target="_blank" rel="noopener noreferrer">Download</a>
+                                <a href="https://github.com/npukolno/sixteencloud/releases/latest" class="project-link" id="sixteencloud-download" target="_blank" rel="noopener noreferrer">Download</a>
                             </div>
                         </div>
                     </div>
@@ -545,7 +545,7 @@
     </button>
 
     <script>
-        fetch('https://api.github.com/repos/ocb2016/ocbbio/releases/latest')
+        fetch('https://api.github.com/repos/npukolno/sixteencloud/releases/latest')
             .then(r => r.json())
             .then(data => {
                 const exe = data.assets && data.assets.find(a => a.name.endsWith('.exe'));
