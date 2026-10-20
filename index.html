@@ -351,7 +351,7 @@
                             </div>
                             <p class="project-description"><span class="project-update">UPDATE 3.0 AVAILABLE!</span>Unofficial SoundCloud desktop client: ad-free playback, synced lyrics, 10-band EQ, live visualizer, track and playlist downloads, Discord Rich Presence, Linux tray and MPRIS. Linux, Windows and macOS.</p>
                             <div class="project-links">
-                                <a href="https://github.com/npukolno/sixteencloud/releases/latest" class="project-link" id="sixteencloud-download" target="_blank" rel="noopener noreferrer">Download</a>
+                                <a href="https://sixteencloud.ocb2016.me" class="project-link" id="sixteencloud-site" target="_blank" rel="noopener noreferrer">Visit site</a>
                             </div>
                         </div>
                     </div>
@@ -544,18 +544,6 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
     </button>
 
-    <script>
-        fetch('https://api.github.com/repos/npukolno/sixteencloud/releases/latest')
-            .then(r => r.json())
-            .then(data => {
-                const exe = data.assets && data.assets.find(a => a.name.endsWith('.exe'));
-                if (exe) {
-                    const link = document.getElementById('sixteencloud-download');
-                    if (link) link.href = exe.browser_download_url;
-                }
-            })
-            .catch(() => {});
-    </script>
     <script src="script.js"></script>
     <script src="cube.js"></script>
 </body>
