@@ -320,10 +320,30 @@
                     <div class="timeline-item left">
                         <div class="timeline-dot"></div>
                         <div class="timeline-card">
+                            <div class="timeline-card-icon"><img src="icons/needtoplay.svg" alt=""></div>
+                            <div class="timeline-card-info">
+                                <span class="timeline-card-title">Launched NeedToPlay</span>
+                                <span class="timeline-card-date">Jul 2026</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item right">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
                             <div class="timeline-card-icon"><img src="icons/hsb.svg" alt=""></div>
                             <div class="timeline-card-info">
                                 <span class="timeline-card-title">Closed H.S.B</span>
                                 <span class="timeline-card-date">Aug 2026</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item left">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="timeline-card-icon"><img src="icons/depoth.svg" alt=""></div>
+                            <div class="timeline-card-info">
+                                <span class="timeline-card-title">Launched Depoth</span>
+                                <span class="timeline-card-date">Oct 2026</span>
                             </div>
                         </div>
                     </div>
@@ -345,14 +365,53 @@
                         </div>
                         <div class="project-details">
                             <div class="project-tech">
-                                <span class="tech-chip">Electron</span>
-                                <span class="tech-chip">TypeScript</span>
-                                <span class="tech-chip">Cross-platform</span>
+                                <span class="tech-chip"><img src="icons/electron.svg" alt="">Electron</span>
+                                <span class="tech-chip"><img src="icons/typescript.svg" alt="">TypeScript</span>
+                                <span class="tech-chip"><img src="icons/linux.svg" alt="">Cross-platform</span>
                             </div>
                             <p class="project-description"><span class="project-update">UPDATE 3.0 AVAILABLE!</span>Unofficial SoundCloud desktop client: ad-free playback, synced lyrics, 10-band EQ, live visualizer, track and playlist downloads, Discord Rich Presence, Linux tray and MPRIS. Linux, Windows and macOS.</p>
                             <div class="project-links">
                                 <a href="https://sixteencloud.ocb2016.me" class="project-link" id="sixteencloud-site" target="_blank" rel="noopener noreferrer">Visit site</a>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="project-card active">
+                        <div class="project-preview">
+                            <div class="project-icon-wrap">
+                                <img src="icons/needtoplay.svg" alt="NeedToPlay" class="project-icon">
+                            </div>
+                            <span class="project-name">NeedToPlay</span>
+                            <span class="project-badge active-badge">Active</span>
+                        </div>
+                        <div class="project-details">
+                            <div class="project-tech">
+                                <span class="tech-chip"><img src="icons/rust.svg" alt="">Rust</span>
+                                <span class="tech-chip"><img src="icons/tauri.svg" alt="">Tauri</span>
+                                <span class="tech-chip"><img src="icons/wine.svg" alt="">Wine / Proton</span>
+                                <span class="tech-chip"><img src="icons/linux.svg" alt="">Linux</span>
+                            </div>
+                            <p class="project-description">Private project (Jul 2026). Desktop launcher for local Windows games on Linux: per-game Wine/Proton prefixes, runner selection (wine, proton, GE, UMU), DXVK/VKD3D overrides, DLL override management, GameMode, MangoHud and Gamescope presets, compressed <code>.tar.zst</code> prefix backup/restore, storage doctor and real playtime accounting. Automatically fingerprints FreeTP / online-fix.me multiplayer packs — proxy DLLs, SteamFix/OnlineFix/EpicFix configs, Spacewar and EOS runtime markers — and wires the environment so the fix actually loads. Built with Rust + Tauri and a native GUI.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card active">
+                        <div class="project-preview">
+                            <div class="project-icon-wrap">
+                                <img src="icons/depoth.svg" alt="Depoth" class="project-icon">
+                            </div>
+                            <span class="project-name">Depoth</span>
+                            <span class="project-badge active-badge">Active</span>
+                        </div>
+                        <div class="project-details">
+                            <div class="project-tech">
+                                <span class="tech-chip"><img src="icons/csharp.svg" alt="">C#</span>
+                                <span class="tech-chip"><img src="icons/dotnet.svg" alt="">.NET 8</span>
+                                <span class="tech-chip"><img src="icons/dotnet.svg" alt="">Avalonia</span>
+                                <span class="tech-chip"><img src="icons/lua.svg" alt="">Lua</span>
+                                <span class="tech-chip"><img src="icons/steam.svg" alt="">Steam</span>
+                            </div>
+                            <p class="project-description">Private project (Oct 2026). Steam depot toolkit: downloads games through Lua scripts, DepotCache and manifests, applies online fixes and launch wiring, parses and edits <code>stplug-in</code> Lua, migrates depots and caches, keeps prefixes/manifests backed up, and ships a built-in Lua editor plus CLI diagnostics (<code>info</code>, <code>list</code>, <code>libraries</code>, <code>parse</code>, <code>install</code>). .NET 8 / C# with an Avalonia desktop UI.</p>
                         </div>
                     </div>
 
@@ -366,9 +425,9 @@
                         </div>
                         <div class="project-details">
                             <div class="project-tech">
-                                <span class="tech-chip">Python</span>
-                                <span class="tech-chip">aiogram</span>
-                                <span class="tech-chip">Telegram</span>
+                                <span class="tech-chip"><img src="icons/python.svg" alt="">Python</span>
+                                <span class="tech-chip"><img src="icons/telegram.svg" alt="">aiogram</span>
+                                <span class="tech-chip"><img src="icons/telegram.svg" alt="">Telegram</span>
                             </div>
                             <p class="project-description">Halyava Seeker Bot — tracks free and discounted games across Steam, Epic, GamerPower, and itch.io. Giveaway alerts, genre filters, wishlist + price drops, multi-language and multi-currency. Background checks every 30 min–6 h depending on the source.</p>
                         </div>
@@ -384,12 +443,12 @@
                         </div>
                         <div class="project-details">
                             <div class="project-tech">
-                                <span class="tech-chip">Python</span>
-                                <span class="tech-chip">FastAPI</span>
-                                <span class="tech-chip">React</span>
-                                <span class="tech-chip">TypeScript</span>
-                                <span class="tech-chip">Docker</span>
-                                <span class="tech-chip">RAG</span>
+                                <span class="tech-chip"><img src="icons/python.svg" alt="">Python</span>
+                                <span class="tech-chip"><img src="icons/fastapi.svg" alt="">FastAPI</span>
+                                <span class="tech-chip"><img src="icons/react.svg" alt="">React</span>
+                                <span class="tech-chip"><img src="icons/typescript.svg" alt="">TypeScript</span>
+                                <span class="tech-chip"><img src="icons/docker.svg" alt="">Docker</span>
+                                <span class="tech-chip"><img src="icons/ai.svg" alt="">RAG</span>
                             </div>
                             <p class="project-description">Full-stack SaaS (Apr–Jul 2026): autonomous Telegram persona-clone agent via MTProto. Behavioral engine (typing jitter, sleep schedule, delayed replies, reactions), Human-in-the-Loop for risky topics, PersonaBible + RAG over chat history, CryptoBot billing, Mini-App control panel. Handed off July 2026.</p>
                         </div>
@@ -413,9 +472,9 @@
                             </div>
                             <div class="project-details">
                                 <div class="project-tech">
-                                    <span class="tech-chip">C++</span>
-                                    <span class="tech-chip">MPRIS</span>
-                                    <span class="tech-chip">lrclib</span>
+                                    <span class="tech-chip"><img src="icons/c++.svg" alt="">C++</span>
+                                    <span class="tech-chip"><img src="icons/mpris.svg" alt="">MPRIS</span>
+                                    <span class="tech-chip"><img src="icons/lrclib.svg" alt="">lrclib</span>
                                 </div>
                                 <p class="project-description">Terminal utility from the Arch transition: current track via MPRIS, search on lrclib.net, synced lyrics in the terminal.</p>
                             </div>
@@ -431,10 +490,10 @@
                             </div>
                             <div class="project-details">
                                 <div class="project-tech">
-                                    <span class="tech-chip">C++</span>
-                                    <span class="tech-chip">Qt</span>
-                                    <span class="tech-chip">UDP</span>
-                                    <span class="tech-chip">Quickshell</span>
+                                    <span class="tech-chip"><img src="icons/c++.svg" alt="">C++</span>
+                                    <span class="tech-chip"><img src="icons/qt.svg" alt="">Qt</span>
+                                    <span class="tech-chip"><img src="icons/udp.svg" alt="">UDP</span>
+                                    <span class="tech-chip"><img src="icons/quickshell.svg" alt="">Quickshell</span>
                                 </div>
                                 <p class="project-description">Local-network file transfer phone ↔ PC. Qt + Quickshell UI, C++ backend, fast UDP transfer, guest web server with QR access.</p>
                             </div>
@@ -450,10 +509,10 @@
                             </div>
                             <div class="project-details">
                                 <div class="project-tech">
-                                    <span class="tech-chip">C++</span>
-                                    <span class="tech-chip">Whisper</span>
-                                    <span class="tech-chip">VAD</span>
-                                    <span class="tech-chip">STEM</span>
+                                    <span class="tech-chip"><img src="icons/c++.svg" alt="">C++</span>
+                                    <span class="tech-chip"><img src="icons/ai.svg" alt="">Whisper</span>
+                                    <span class="tech-chip"><img src="icons/ai.svg" alt="">VAD</span>
+                                    <span class="tech-chip"><img src="icons/ai.svg" alt="">STEM</span>
                                 </div>
                                 <p class="project-description">Lyrics generator for tracks missing on lrclib — Whisper (Base/Medium/Turbo), VAD, STEM separation, multilingual. Dropped: too much per-track handholding.</p>
                             </div>
@@ -469,9 +528,9 @@
                             </div>
                             <div class="project-details">
                                 <div class="project-tech">
-                                    <span class="tech-chip">Java</span>
-                                    <span class="tech-chip">Minecraft 1.20.1</span>
-                                    <span class="tech-chip">PvP</span>
+                                    <span class="tech-chip"><img src="icons/java.svg" alt="">Java</span>
+                                    <span class="tech-chip"><img src="icons/minecraft.svg" alt="">Minecraft 1.20.1</span>
+                                    <span class="tech-chip"><img src="icons/pvp.svg" alt="">PvP</span>
                                 </div>
                                 <p class="project-description">Military-political MC server (Annihilation / control points). Solo Java mod for full server logic. Public Dec 2025, closed Jan 2026 — hosting costs.</p>
                             </div>
@@ -487,9 +546,9 @@
                             </div>
                             <div class="project-details">
                                 <div class="project-tech">
-                                    <span class="tech-chip">Python</span>
-                                    <span class="tech-chip">yt-dlp</span>
-                                    <span class="tech-chip">Telegram</span>
+                                    <span class="tech-chip"><img src="icons/python.svg" alt="">Python</span>
+                                    <span class="tech-chip"><img src="icons/youtube.svg" alt="">yt-dlp</span>
+                                    <span class="tech-chip"><img src="icons/telegram.svg" alt="">Telegram</span>
                                 </div>
                                 <p class="project-description">Telegram bot for high-quality media from YouTube, TikTok, Instagram, Pinterest, SoundCloud. Closed after YouTube friction and shifting focus.</p>
                             </div>

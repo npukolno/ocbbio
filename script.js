@@ -266,17 +266,42 @@ function initClosedProjectsToggle() {
     if (!closedToggle || !closedProjects) return;
 
     const label = closedToggle.querySelector(".projects-toggle-label");
-    const cards = () => [...closedProjects.querySelectorAll(".project-card")];
+    const grid = closedProjects;
+    const cards = () => [...grid.querySelectorAll(".project-card")];
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const OPEN_MS = 320;
+    const CLOSE_MS = 320;
+    const STAGGER_MS = 55;
+    const MAX_STAGGER = 8;
+
     let animating = false;
+    let pendingTimer = 0;
 
     const setLabel = (open) => {
         if (label) label.textContent = open ? "Hide closed" : "Show closed";
     };
 
-    const openClosed = () => {
+    const measure = () => {
+        const prev = grid.style.height;
+        grid.style.height = "auto";
+        const height = grid.getBoundingClientRect().height;
+        grid.style.height = prev;
+        return Math.max(0, Math.round(height));
+    };
+
+    const wait = (ms) => {
+        window.clearTimeout(pendingTimer);
+        return new Promise((resolve) => {
+            pendingTimer = window.setTimeout(resolve, ms);
+        });
+    };
+
+    const openClosed = async () => {
         animating = true;
-        closedProjects.hidden = false;
-        closedProjects.classList.remove("is-closing");
+        grid.hidden = false;
+        grid.style.height = "0px";
+        grid.style.opacity = "0";
 
         const list = cards();
         list.forEach((card) => {
@@ -284,43 +309,54 @@ function initClosedProjectsToggle() {
             card.style.setProperty("--reveal-delay", "0ms");
         });
 
-        // Reflow so the browser sees opacity:0 before we animate in
-        void closedProjects.offsetWidth;
+        // Reflow so the browser sees the collapsed state before expanding
+        void grid.offsetWidth;
+
+        grid.style.height = `${measure()}px`;
+        grid.style.opacity = "1";
 
         list.forEach((card, i) => {
-            const delayMs = Math.min(i, 8) * 55;
+            const delayMs = Math.min(i, MAX_STAGGER) * STAGGER_MS;
             card.style.setProperty("--reveal-delay", `${delayMs}ms`);
             requestAnimationFrame(() => card.classList.add("is-visible"));
         });
 
-        window.setTimeout(() => {
-            animating = false;
-        }, Math.min(list.length, 8) * 55 + 480);
+        await wait(OPEN_MS + Math.min(list.length, MAX_STAGGER) * STAGGER_MS);
+        grid.style.height = "auto";
+        animating = false;
     };
 
-    const closeClosed = () => {
+    const closeClosed = async () => {
         animating = true;
-        const list = cards();
 
-        // Reverse stagger: last card fades first feels a bit nicer on collapse
+        const list = cards();
+        const startHeight = grid.getBoundingClientRect().height;
+
+        // Lock the current pixel height so the browser has something to animate from
+        grid.style.height = `${Math.round(startHeight)}px`;
+        void grid.offsetWidth;
+
+        grid.style.height = "0px";
+        grid.style.opacity = "0";
+
         list.forEach((card, i) => {
-            const delayMs = Math.min(list.length - 1 - i, 8) * 40;
+            const delayMs = Math.min(list.length - 1 - i, MAX_STAGGER) * 30;
             card.style.setProperty("--reveal-delay", `${delayMs}ms`);
             requestAnimationFrame(() => card.classList.remove("is-visible"));
         });
 
-        closedProjects.classList.add("is-closing");
+        await wait(CLOSE_MS + 40);
 
-        const doneMs = Math.min(list.length, 8) * 40 + 450;
-        window.setTimeout(() => {
-            closedProjects.hidden = true;
-            closedProjects.classList.remove("is-closing");
-            list.forEach((card) => {
-                card.style.setProperty("--reveal-delay", "0ms");
-            });
-            animating = false;
-        }, doneMs);
+        grid.hidden = true;
+        grid.style.height = "";
+        grid.style.opacity = "";
+        list.forEach((card) => card.style.setProperty("--reveal-delay", "0ms"));
+        animating = false;
     };
+
+    if (reduceMotion.matches) {
+        grid.style.transition = "none";
+    }
 
     closedToggle.addEventListener("click", () => {
         if (animating) return;
