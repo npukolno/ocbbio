@@ -302,6 +302,9 @@ function initClosedProjectsToggle() {
         grid.hidden = false;
         grid.style.height = "0px";
         grid.style.opacity = "0";
+        // Start from a fully collapsed box so margin/border animate back in with the height
+        grid.style.marginTop = "0px";
+        grid.style.borderTopColor = "transparent";
 
         const list = cards();
         list.forEach((card) => {
@@ -314,6 +317,8 @@ function initClosedProjectsToggle() {
 
         grid.style.height = `${measure()}px`;
         grid.style.opacity = "1";
+        grid.style.marginTop = "";
+        grid.style.borderTopColor = "";
 
         list.forEach((card, i) => {
             const delayMs = Math.min(i, MAX_STAGGER) * STAGGER_MS;
@@ -338,6 +343,8 @@ function initClosedProjectsToggle() {
 
         grid.style.height = "0px";
         grid.style.opacity = "0";
+        grid.style.marginTop = "0px";
+        grid.style.borderTopColor = "transparent";
 
         list.forEach((card, i) => {
             const delayMs = Math.min(list.length - 1 - i, MAX_STAGGER) * 30;
@@ -350,6 +357,8 @@ function initClosedProjectsToggle() {
         grid.hidden = true;
         grid.style.height = "";
         grid.style.opacity = "";
+        grid.style.marginTop = "";
+        grid.style.borderTopColor = "";
         list.forEach((card) => card.style.setProperty("--reveal-delay", "0ms"));
         animating = false;
     };

@@ -796,6 +796,12 @@ img {
 
 .timeline-card-icon img {
     opacity: 0.85;
+    object-fit: contain;
+}
+
+.timeline-card-icon img.icon-lg {
+    width: 25px;
+    height: 25px;
 }
 
 .timeline-card-info {
@@ -860,6 +866,13 @@ img {
     width: 24px;
     height: 24px;
     opacity: 0.9;
+    object-fit: contain;
+}
+
+.project-icon.project-icon-lg {
+    width: 28px;
+    height: 28px;
+    opacity: 1;
 }
 
 .project-name {
@@ -1033,8 +1046,11 @@ img {
     border-top: 1px solid var(--rule);
     overflow: hidden;
     opacity: 1;
+    /* margin and border collapse with the height, otherwise the page snaps at the end */
     transition:
         height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+        margin-top 320ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-top-color 240ms ease,
         opacity 220ms ease;
 }
 
