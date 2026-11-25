@@ -230,13 +230,34 @@ def main():
     from starlette.applications import Starlette
     from starlette.routing import Mount
     from contextlib import asynccontextmanager
-    app_inner = mcp.streamable_http_app()
+    streamable = mcp.streamable_http_app()          # POST /mcp
+    sse = mcp.sse_app()                             # GET /sse + POST /messages/
+    inner = Starlette(routes=list(streamable.routes) + list(sse.routes))
 
     @asynccontextmanager
     async def lifespan(_):
         async with mcp.session_manager.run():
             yield
-    app = Starlette(routes=[Mount(f"/{TOKEN}", app=app_inner)], lifespan=lifespan)
+    app = Starlette(routes=[Mount(f"/{TOKEN}", app=inner)], lifespan=lifespan)
+
+    async def show_requests(scope, receive, send):
+        """Print every request so you can see whether Viktor reaches this computer."""
+        if scope["type"] != "http":
+            return await app(scope, receive, send)
+        path = scope["path"]
+        shown = path.replace(TOKEN, "<token>") if TOKEN in path else path + "  (no token: refused)"
+        status = {}
+        async def send_wrap(msg):
+            if msg["type"] == "http.response.start":
+                status["code"] = msg["status"]
+                print(f"  {time.strftime('%H:%M:%S')}  {scope['method']} {shown} -> {msg['status']}", flush=True)
+            await send(msg)
+        try:
+            return await app(scope, receive, send_wrap)
+        except RuntimeError as e:  # SSE stream closed by the client: harmless
+            if "after response already completed" not in str(e):
+                raise
+
     print(f"\n  viktor-local: folder = {ROOT}")
     if "--no-tunnel" in sys.argv:
         print(f"  local only: http://127.0.0.1:{PORT}/{TOKEN}/mcp  (Viktor cannot use this one)")
@@ -244,8 +265,10 @@ def main():
         url = start_tunnel(PORT)
         print("\n  Paste this into Viktor -> Add Custom Integration -> MCP Server:")
         print(f"\n      {url}/{TOKEN}/mcp\n")
-        print("  Keep it secret: it gives shell access to this computer. Ctrl+C to stop.\n")
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
+        print(f"  (if Viktor asks for an SSE URL instead: {url}/{TOKEN}/sse)")
+        print("  Keep it secret: it gives shell access to this computer. Ctrl+C to stop.")
+        print("  Requests from Viktor will show up below:\n")
+    uvicorn.run(show_requests, host="127.0.0.1", port=PORT, log_level="warning")
 
 
 if __name__ == "__main__":
