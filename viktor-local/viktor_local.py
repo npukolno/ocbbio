@@ -201,8 +201,10 @@ def main():
             yield
     app = Starlette(routes=[Mount(f"/{TOKEN}", app=app_inner)], lifespan=lifespan)
     print(f"\n  viktor-local: folder = {ROOT}")
-    print(f"  local URL:  http://127.0.0.1:{PORT}/{TOKEN}/mcp")
-    if "--no-tunnel" not in sys.argv:
+    if "--no-tunnel" in sys.argv:
+        print(f"  local only: http://127.0.0.1:{PORT}/{TOKEN}/mcp  (Viktor cannot use this one)")
+    else:
+        print("  opening an https tunnel...")
         url = start_tunnel(PORT)
         print("\n  Paste this into Viktor -> Add Custom Integration -> MCP Server:")
         print(f"\n      {url}/{TOKEN}/mcp\n")
