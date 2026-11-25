@@ -168,24 +168,42 @@ def cloudflared_path() -> str:
     return str(exe)
 
 
-def start_tunnel(port: int) -> str:
-    """Open a Cloudflare quick tunnel (no account) and return its public https URL."""
-    proc = subprocess.Popen([cloudflared_path(), "tunnel", "--no-autoupdate", "--url", f"http://127.0.0.1:{port}"],
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    found = {}
+def _try_tunnel(port: int, protocol: str, wait_s: int):
+    cmd = [cloudflared_path(), "tunnel", "--no-autoupdate", "--protocol", protocol, "--url", f"http://127.0.0.1:{port}"]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    found, tail = {}, []
     def reader():
         for line in proc.stdout:
+            tail.append(line.rstrip()); del tail[:-15]
             m = re.search(r"https://[a-z0-9-]+\.trycloudflare\.com", line)
             if m and "url" not in found:
                 found["url"] = m.group(0)
     threading.Thread(target=reader, daemon=True).start()
-    for _ in range(60):
+    for i in range(wait_s * 2):
         if "url" in found:
-            return found["url"]
+            print(); return found["url"], tail
         if proc.poll() is not None:
             break
+        if i % 4 == 0:
+            print(".", end="", flush=True)
         time.sleep(0.5)
-    raise RuntimeError("cloudflared did not give a URL; run with --no-tunnel and expose the port yourself")
+    proc.terminate(); print(); return None, tail
+
+
+def start_tunnel(port: int) -> str:
+    """Open a Cloudflare quick tunnel (no account) and return its public https URL.
+    Tries QUIC first, then HTTP/2 (for networks that block UDP)."""
+    tail = []
+    for protocol in ("auto", "http2"):
+        print(f"  opening https tunnel ({protocol})", end="", flush=True)
+        url, tail = _try_tunnel(port, protocol, 45)
+        if url:
+            return url
+    print("\n  cloudflared did not give a URL. Its last output:\n")
+    print("\n".join("    " + l for l in tail))
+    print("\n  Usually this means Cloudflare is blocked on this network: try a VPN, or run with --no-tunnel")
+    print("  and expose port", port, "yourself (Tailscale Funnel, ngrok).\n")
+    sys.exit(1)
 
 
 def main():
@@ -204,7 +222,6 @@ def main():
     if "--no-tunnel" in sys.argv:
         print(f"  local only: http://127.0.0.1:{PORT}/{TOKEN}/mcp  (Viktor cannot use this one)")
     else:
-        print("  opening an https tunnel...")
         url = start_tunnel(PORT)
         print("\n  Paste this into Viktor -> Add Custom Integration -> MCP Server:")
         print(f"\n      {url}/{TOKEN}/mcp\n")
