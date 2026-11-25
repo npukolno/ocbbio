@@ -206,7 +206,26 @@ def start_tunnel(port: int) -> str:
     sys.exit(1)
 
 
+def free_port(start: int) -> int:
+    """First port from start that nothing listens on (an old copy may still hold 8765)."""
+    import socket
+    for port in range(start, start + 50):
+        with socket.socket() as sk:
+            try:
+                sk.bind(("127.0.0.1", port)); return port
+            except OSError:
+                continue
+    raise RuntimeError("no free port")
+
+
 def main():
+    global PORT
+    if PORT == 8765 and "VIKTOR_PORT" not in os.environ:
+        p = free_port(8765)
+        if p != 8765:
+            print(f"\n  port 8765 is busy (an old viktor-local still running? stop it: pkill -f viktor_local.py)")
+            print(f"  using port {p} instead")
+        PORT = p
     import uvicorn
     from starlette.applications import Starlette
     from starlette.routing import Mount
