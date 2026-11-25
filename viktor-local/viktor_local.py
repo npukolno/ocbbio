@@ -169,7 +169,12 @@ def cloudflared_path() -> str:
 
 
 def _try_tunnel(port: int, protocol: str, wait_s: int):
-    cmd = [cloudflared_path(), "tunnel", "--no-autoupdate", "--protocol", protocol, "--url", f"http://127.0.0.1:{port}"]
+    # An empty config: a ~/.cloudflared/config.yml with its own ingress rules (e.g. a catch-all
+    # http_status:404) would otherwise hijack the quick tunnel and never reach this server.
+    CACHE.mkdir(parents=True, exist_ok=True)
+    empty = CACHE / "empty-config.yml"; empty.write_text("{}\n")
+    cmd = [cloudflared_path(), "tunnel", "--config", str(empty), "--no-autoupdate", "--protocol", protocol,
+           "--url", f"http://127.0.0.1:{port}"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     found, tail = {}, []
     def reader():
