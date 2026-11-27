@@ -168,6 +168,39 @@ def cloudflared_path() -> str:
     return str(exe)
 
 
+def _drain_and_watch(proc, tail: list[str], started_evt: threading.Event, state: dict, pattern: str, fail_marker: str | None = None):
+    for line in proc.stdout:
+        s = line.rstrip()
+        tail.append(s); del tail[:-15]
+        if fail_marker and fail_marker in line and "url" not in state:
+            state["api_fail"] = True
+        m = re.search(pattern, line)
+        if m and "url" not in state:
+            state["url"] = m.group(0)
+            started_evt.set()
+    if started_evt.is_set() and not state.get("stopping"):
+        print("\n  [tunnel disconnected — restart viktor-local]", flush=True)
+
+
+def _wait_tunnel(cmd: list[str], pattern: str, wait_s: int, fail_marker: str | None = None):
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    state, tail, started_evt = {}, [], threading.Event()
+    threading.Thread(
+        target=_drain_and_watch, args=(proc, tail, started_evt, state, pattern, fail_marker), daemon=True
+    ).start()
+    for i in range(wait_s * 2):
+        if "url" in state:
+            print(); return state["url"], (proc, state), tail, False
+        if state.get("api_fail") or proc.poll() is not None:
+            break
+        if i % 4 == 0:
+            print(".", end="", flush=True)
+        time.sleep(0.5)
+    state["stopping"] = True
+    proc.terminate(); print()
+    return None, None, tail, bool(state.get("api_fail"))
+
+
 def _try_tunnel(port: int, protocol: str, wait_s: int):
     # An empty config: a ~/.cloudflared/config.yml with its own ingress rules (e.g. a catch-all
     # http_status:404) would otherwise hijack the quick tunnel and never reach this server.
@@ -175,39 +208,60 @@ def _try_tunnel(port: int, protocol: str, wait_s: int):
     empty = CACHE / "empty-config.yml"; empty.write_text("{}\n")
     cmd = [cloudflared_path(), "tunnel", "--config", str(empty), "--no-autoupdate", "--protocol", protocol,
            "--url", f"http://127.0.0.1:{port}"]
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    found, tail = {}, []
-    def reader():
-        for line in proc.stdout:
-            tail.append(line.rstrip()); del tail[:-15]
-            m = re.search(r"https://[a-z0-9-]+\.trycloudflare\.com", line)
-            if m and "url" not in found:
-                found["url"] = m.group(0)
-    threading.Thread(target=reader, daemon=True).start()
-    for i in range(wait_s * 2):
-        if "url" in found:
-            print(); return found["url"], tail
-        if proc.poll() is not None:
-            break
-        if i % 4 == 0:
-            print(".", end="", flush=True)
-        time.sleep(0.5)
-    proc.terminate(); print(); return None, tail
+    # Exclude api.trycloudflare.com which appears in cloudflared error logs on failure.
+    return _wait_tunnel(
+        cmd,
+        r"https://(?!api\.)[a-z0-9-]+\.trycloudflare\.com",
+        wait_s,
+        fail_marker="failed to request quick Tunnel",
+    )
 
 
-def start_tunnel(port: int) -> str:
-    """Open a Cloudflare quick tunnel (no account) and return its public https URL.
-    Tries QUIC first, then HTTP/2 (for networks that block UDP)."""
+def _try_localhost_run(port: int, wait_s: int = 20):
+    ssh = shutil.which("ssh")
+    if not ssh and WIN:
+        win_ssh = pathlib.Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "OpenSSH" / "ssh.exe"
+        if win_ssh.exists():
+            ssh = str(win_ssh)
+    if not ssh:
+        return None, None, ["ssh not found in PATH"]
+    CACHE.mkdir(parents=True, exist_ok=True)
+    known = CACHE / "known_hosts"
+    cmd = [
+        ssh, "-T",
+        "-o", "StrictHostKeyChecking=no",
+        "-o", f"UserKnownHostsFile={known}",
+        "-o", "ConnectTimeout=10",
+        "-o", "BatchMode=yes",
+        "-o", "ServerAliveInterval=30",
+        "-o", "ServerAliveCountMax=3",
+        "-o", "ExitOnForwardFailure=yes",
+        "-R", f"80:127.0.0.1:{port}",
+        "nokey@localhost.run",
+    ]
+    url, proc, tail, _ = _wait_tunnel(cmd, r"https://[a-z0-9-]+\.(?:app\.)?lhr\.life", wait_s)
+    return url, proc, tail
+
+
+def start_tunnel(port: int):
+    """Open a public HTTPS tunnel (Cloudflare quick tunnel, falling back to localhost.run over SSH)."""
     tail = []
-    for protocol in ("auto", "http2"):
-        print(f"  opening https tunnel ({protocol})", end="", flush=True)
-        url, tail = _try_tunnel(port, protocol, 45)
-        if url:
-            return url
-    print("\n  cloudflared did not give a URL. Its last output:\n")
-    print("\n".join("    " + l for l in tail))
-    print("\n  Usually this means Cloudflare is blocked on this network: try a VPN, or run with --no-tunnel")
-    print("  and expose port", port, "yourself (Tailscale Funnel, ngrok).\n")
+    if "--ssh" not in sys.argv:
+        for protocol in ("auto", "http2"):
+            print(f"  opening https tunnel (cloudflare {protocol})", end="", flush=True)
+            url, proc, tail, api_fail = _try_tunnel(port, protocol, 20)
+            if url:
+                return url, proc
+            if api_fail:
+                print("  cloudflare quick-tunnel API unreachable, falling back to ssh...", flush=True)
+                break
+    print("  opening https tunnel (localhost.run ssh)", end="", flush=True)
+    url, proc, lr_tail = _try_localhost_run(port, 25)
+    if url:
+        return url, proc
+    print("\n  could not open a public tunnel. Last output:\n")
+    print("\n".join("    " + l for l in (lr_tail or tail)))
+    print("\n  Check internet/VPN, or run with --no-tunnel and expose port", port, "yourself (Tailscale Funnel, ngrok).\n")
     sys.exit(1)
 
 
@@ -225,11 +279,12 @@ def free_port(start: int) -> int:
 
 def main():
     global PORT
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(line_buffering=True)
     if PORT == 8765 and "VIKTOR_PORT" not in os.environ:
         p = free_port(8765)
         if p != 8765:
-            print(f"\n  port 8765 is busy (an old viktor-local still running? stop it: pkill -f viktor_local.py)")
-            print(f"  using port {p} instead")
+            print(f"\n  port 8765 is busy (used by another process or old viktor-local), using port {p} instead")
         PORT = p
     import uvicorn
     from starlette.applications import Starlette
@@ -264,16 +319,24 @@ def main():
                 raise
 
     print(f"\n  viktor-local: folder = {ROOT}")
+    tunnel = None
     if "--no-tunnel" in sys.argv:
         print(f"  local only: http://127.0.0.1:{PORT}/{TOKEN}/mcp  (Viktor cannot use this one)")
     else:
-        url = start_tunnel(PORT)
+        url, tunnel = start_tunnel(PORT)
         print("\n  Paste this into Viktor -> Add Custom Integration -> MCP Server:")
         print(f"\n      {url}/{TOKEN}/mcp\n")
         print(f"  (if Viktor asks for an SSE URL instead: {url}/{TOKEN}/sse)")
         print("  Keep it secret: it gives shell access to this computer. Ctrl+C to stop.")
         print("  Requests from Viktor will show up below:\n")
-    uvicorn.run(show_requests, host="127.0.0.1", port=PORT, log_level="warning")
+    try:
+        uvicorn.run(show_requests, host="127.0.0.1", port=PORT, log_level="warning")
+    finally:
+        if tunnel is not None:
+            proc, state = tunnel
+            state["stopping"] = True
+            if proc.poll() is None:
+                proc.terminate()
 
 
 if __name__ == "__main__":
